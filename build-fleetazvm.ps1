@@ -5,8 +5,6 @@ Param (
 [int32] $numberofvms
 )
 
-# Read in console input to determine how many times to loop.
-# Set the initial counter value.
 $count = 1
 $username = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMUserName").SecretValueText
 $username
@@ -33,6 +31,7 @@ New-AzVm `
     # This is equivalent to $count = $count + 1
     $count++
 
-} 
+}
+Write-host "You now have $numberofvms built, enjoy your fleet" 
 # End of the loop. 
 # The loop will continue while $count is less than or equal to the $iterations variable set above.
