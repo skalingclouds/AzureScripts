@@ -1,4 +1,4 @@
-$keyvaultname = "SkalingCloudsVault"
+$keyvaultname = ""
 $vms = (get-azvm).Name 
 $username = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMUserName").SecretValueText
 $username
