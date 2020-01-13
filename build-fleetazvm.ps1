@@ -10,22 +10,6 @@ Param (
 [Parameter(Mandatory=$true)] 
 [int32] $numberofvms
 )
-#$region = "West US 2"
-$count = 0
-$vms = Get-AzVm 
-foreach ($vm in $vms) {
-    $count = $count + 1
-    New-Variable -Scope Global -Force -Name $count -Value $vm
-    $vmname = $vm.name
-    write-host "Select $count for $vmname"
-}
-$govm = read-host "what is your selection"
-if ($govm -eq 1){
-    $selectedvmname = $1.Name
-    $selectedvmrg = $1.ResourceGroupName
-    write-host  "I will connect you to $selectedvmname at resource group $selectedvmrg"
-}
-
 
 $vmImageid = (Get-AzGalleryImageDefinition -ResourceGroupName "sc-coreinfra-01" -GalleryName scsig01).id
 
@@ -77,7 +61,3 @@ while ($count -le $numberofvms) {
 }
 
 Write-host "You now have $numberofvms built, enjoy your fleet" 
-# End of the loop. 
-# The loop will continue while $count is less than or equal to the $iterations variable set above.
-#Get-AzPublicIpAddress -ResourceGroupName "myResourceGroup" | Select "IpAddress"
-#mstsc /v:publicIpAddress
