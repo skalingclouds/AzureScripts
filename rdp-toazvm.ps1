@@ -1,5 +1,6 @@
-$keyvaultname = ""
+$keyvaultname = "SkalingCloudsVault"
 $vms = (get-azvm).Name 
+$vmpowerstatus = (get-azvm -status).PowerState
 $username = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMUserName").SecretValueText
 $username
 $password = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMPassword").SecretValueText
@@ -27,6 +28,11 @@ Function Show-Menu {
     $nicobject = (Get-AzNetworkInterface -name $nicname)
     $privateipaddress = $nicobject.IpConfigurations.PrivateIpAddress
     $publiciptest = (Get-azNetworkInterface -ResourceGroupName $vmrg -Name $nicname).IpConfigurations.PublicIpAddress.Id
+    write-host "Checking $selectedvm power Status"
+    If ($vmpowerstatus -ne "VM Running") {
+        Write-Host "$selectedvm is not running, turning on now, this can take a moment"
+        Start-AzVM -Name $selectedvm -ResourceGroupName $vmrg
+    }
     If ($publicIpTest){
         $publicIpName =  (Get-azNetworkInterface -ResourceGroupName $vmrg -Name $nicname).IpConfigurations.PublicIpAddress.Id.Split('/')  | Select-Object -Last 1
         $publicIpAddress = (Get-AzureRmPublicIpAddress -ResourceGroupName $vmrg -Name $publicIpName).IpAddress
