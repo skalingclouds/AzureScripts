@@ -1,3 +1,5 @@
+
+
 Param (
 [Parameter(Mandatory=$true)] 
 [string] $resourceGroup,
@@ -9,23 +11,26 @@ Param (
 [string] $region,
 [Parameter(Mandatory=$true)] 
 [int32] $numberofvms
+#[string] $vnet,
+#[string] $subnet
 )
+$vnet = 'FleetVnet'
+$subnet = 'FleetSubnet'
+
 
 $vmImageid = (Get-AzGalleryImageDefinition -ResourceGroupName "sc-coreinfra-01" -GalleryName scsig01).id
-
 $username = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMUserName").SecretValueText
-$username
 $password = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMPassword").SecretValueText
-$password
 $VMLocalAdminUser = $username
 $VMLocalAdminSecurePassword = ConvertTo-SecureString $password -AsPlainText -Force
 $Credential = New-Object System.Management.Automation.PSCredential ($VMLocalAdminUser, $VMLocalAdminSecurePassword);
 
 New-AzResourceGroup -Name $resourceGroup -location $region
 
-$subnetConfig = New-AzVirtualNetworkSubnetConfig -Name mySubnet -AddressPrefix 192.168.1.0/24
+$subnetConfig = New-AzVirtualNetworkSubnetConfig -Name $subnet -AddressPrefix 192.168.42.0/24
 
-$vnet = New-AzVirtualNetwork -ResourceGroupName $resourceGroup -location $region -Name MYvNET -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig
+$vnet = New-AzVirtualNetwork -ResourceGroupName $resourceGroup -location $region -Name $subnet `
+ -AddressPrefix 192.168.0.0/16 -Subnet $subnetConfig
 
 while ($count -le $numberofvms) {
     
@@ -55,9 +60,8 @@ while ($count -le $numberofvms) {
     Add-AzVMNetworkInterface -Id $nic.Id
     
     # Create a virtual machine
-    New-AzVM -ResourceGroupName $resourceGroup -location $region -VM $vmConfig
-
-    
+    New-AzVM -ResourceGroupName $resourceGroup -location $region -VM $vmConfig -AsJob
+   
 }
 
 Write-host "You now have $numberofvms built, enjoy your fleet" 
