@@ -25,7 +25,11 @@ Function Show-Menu {
     $nicobject = (Get-AzNetworkInterface -name $nicname)
     $privateipaddress = $nicobject.IpConfigurations.PrivateIpAddress
     $publiciptest = (Get-azNetworkInterface -ResourceGroupName $vmrg -Name $nicname).IpConfigurations.PublicIpAddress.Id
+    $ostype = (get-azvm -Name $selectedvm).StorageProfile.OsDisk.OsType
+    write-host "OS Type is $ostype"
     write-host "Checking $selectedvm power Status"
+
+    
     If ($vmpowerstatus -ne "VM Running") {
         Write-Host "$selectedvm is not running, turning on now, this"
         Start-AzVM -Name $selectedvm -ResourceGroupName $vmrg
@@ -33,13 +37,23 @@ Function Show-Menu {
     else {
         Write-Host "VM is ON, Connecting now..."
     }
+
+    
     If ($publicIpTest){
         $publicIpName =  (Get-azNetworkInterface -ResourceGroupName $vmrg -Name $nicname).IpConfigurations.PublicIpAddress.Id.Split('/')  | Select-Object -Last 1
         $publicIpAddress = (Get-AzureRmPublicIpAddress -ResourceGroupName $vmrg -Name $publicIpName).IpAddress
-        Write-Host "Public IP Exists, Connecting to $selectedvm via $publicIpAddress"
-        cmdkey.exe /generic:$publicIpAddress /user:$username /pass:$password
-        mstsc.exe /v $publicIpAddress /f
-    } 
+        
+        if ($ostype -ne "Windows") {
+            Write-Host "Public IP Exists, Connecting to $selectedvm via $publicIpAddress"
+            cmd.exe ssh -l $username $publicIpAddress
+            
+        else{
+            Write-Host "Public IP Exists, Connecting to $selectedvm via $publicIpAddress"
+            cmdkey.exe /generic:$publicIpAddress /user:$username /pass:$password
+            mstsc.exe /v $publicIpAddress /f
+    }
+  }
+}
     Else {
         cmdkey.exe /generic:$privateIpAddress /user:$username /pass:$password
         Write-Host "No Public IP, Connecting over Private IP"
