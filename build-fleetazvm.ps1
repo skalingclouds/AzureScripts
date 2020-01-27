@@ -16,9 +16,11 @@ Param (
 )
 $vnet = 'FleetVnet'
 $subnet = 'FleetSubnet'
+$sigGalleryName ='scsig01'
+$sigResourceGroup = 'sc-coreinfra-01'
 
 
-$vmImageid = (Get-AzGalleryImageDefinition -ResourceGroupName "sc-coreinfra-01" -GalleryName scsig01).id
+$vmImageid = (Get-AzGalleryImageDefinition -ResourceGroupName $sigResourceGroup -GalleryName $sigGalleryName).id
 $username = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMUserName").SecretValueText
 $password = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMPassword").SecretValueText
 $VMLocalAdminUser = $username
@@ -35,11 +37,11 @@ $vnet = New-AzVirtualNetwork -ResourceGroupName $resourceGroup -location $region
 while ($count -le $numberofvms) {
     
     $count = $count + 1
-    $govmname = "$basecomputername$count"
-    $nsgname = "nsg$govmname"
-    $nicname = "nic$govmname"
-    $pipname = "pip$govmname"
-    $nsgrulename = "nsgrule$govmname"
+    $vmname = "$basecomputername$count"
+    $nsgname = "nsg$vmname"
+    $nicname = "nic$vmname"
+    $pipname = "pip$vmname"
+    $nsgrulename = "nsgrule$vmname"
 
     $pip = New-AzPublicIpAddress -ResourceGroupName $resourceGroup -location $region -Name $pipname -AllocationMethod Static -IdleTimeoutInMinutes 4
     
@@ -54,8 +56,8 @@ while ($count -le $numberofvms) {
     -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
     
     # Create a virtual machine configuration using $imageVersion.Id to specify the shared image
-    $vmConfig = New-AzVMConfig -VMName $govmname -VMSize Standard_D1_v2 | `
-    Set-AzVMOperatingSystem -Windows -ComputerName $govmname -Credential $Credential | `
+    $vmConfig = New-AzVMConfig -VMName $vmname -VMSize Standard_D1_v2 | `
+    Set-AzVMOperatingSystem -Windows -ComputerName $vmname -Credential $Credential | `
     Set-AzVMSourceImage -Id $vmImageid | `
     Add-AzVMNetworkInterface -Id $nic.Id
     
