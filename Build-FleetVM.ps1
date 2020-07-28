@@ -14,10 +14,10 @@ Param (
 #[string] $vnet,
 #[string] $subnet
 )
-$vnet = 'FleetVnet'
-$subnet = 'FleetSubnet'
-$sigGalleryName ='scsig01'
-$sigResourceGroup = 'sc-coreinfra-01'
+$vnet = ''
+$subnet = ''
+$sigGalleryName =''
+$sigResourceGroup = ''
 
 
 $vmImageid = (Get-AzGalleryImageDefinition -ResourceGroupName $sigResourceGroup -GalleryName $sigGalleryName).id
