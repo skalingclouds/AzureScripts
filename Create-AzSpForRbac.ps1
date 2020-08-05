@@ -5,14 +5,12 @@ Param (
 [string] $KeyVaultName
 )
 
-
 function New-ScriptSP  {
     $global:sp = New-AzADServicePrincipal -DisplayName $SpDisplayName
     $global:BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($sp.Secret)
     $global:UnsecureSecret = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
     $global:SpAppId = $sp.ApplicationId
 }
-
 
 function Remove-ScriptSp {
     if (Get-AzADServicePrincipal -DisplayName $SpDisplayName) {
