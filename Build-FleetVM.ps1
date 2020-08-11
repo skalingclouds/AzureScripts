@@ -14,10 +14,10 @@ Param (
 #[string] $vnet,
 #[string] $subnet
 )
-$vnet = ''
-$subnet = ''
-$sigGalleryName =''
-$sigResourceGroup = ''
+$vnet = "$basecomputername-vnet-wus2-01"
+$subnet = 'serversubnet'
+$sigGalleryName ='scsig01'
+$sigResourceGroup = 'sc-coreinfra-01'
 
 
 $vmImageid = (Get-AzGalleryImageDefinition -ResourceGroupName $sigResourceGroup -GalleryName $sigGalleryName).id
@@ -56,7 +56,7 @@ while ($count -le $numberofvms) {
     -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $pip.Id -NetworkSecurityGroupId $nsg.Id
     
     # Create a virtual machine configuration using $imageVersion.Id to specify the shared image
-    $vmConfig = New-AzVMConfig -VMName $vmname -VMSize Standard_D1_v2 | `
+    $vmConfig = New-AzVMConfig -VMName $vmname -VMSize Standard_DS4_v2 | `
     Set-AzVMOperatingSystem -Windows -ComputerName $vmname -Credential $Credential | `
     Set-AzVMSourceImage -Id $vmImageid | `
     Add-AzVMNetworkInterface -Id $nic.Id

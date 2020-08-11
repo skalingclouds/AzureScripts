@@ -1,4 +1,8 @@
-$keyvaultname = ""
+Param (
+[Parameter(Mandatory=$true)] 
+[string] $keyvaultname
+)
+
 $vms = (get-azvm).Name 
 $username = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMUserName").SecretValueText
 $password = (Get-AzKeyVaultSecret -vaultName $keyvaultname -name "VMPassword").SecretValueText
@@ -41,7 +45,7 @@ Function Show-Menu {
     }
     #Could estbalish a global var baseed on true public ip
     If ($publicIpTest -and  $ostype -eq "Windows"){
-        $publicIpAddress = (Get-AzureRmPublicIpAddress -ResourceGroupName $vmrg -Name $publicIpName).IpAddress
+        $publicIpAddress = (Get-AzPublicIpAddress -ResourceGroupName $vmrg -Name $publicIpName).IpAddress
         Write-Host "Public IP Exists, Connecting to $selectedvm via $publicIpAddress"
         cmdkey.exe /generic:$publicIpAddress /user:$username /pass:$password
         mstsc.exe /v $publicIpAddress /f
@@ -49,7 +53,7 @@ Function Show-Menu {
     else {write-host "there was an issue remoting via public ip"}
     
     If ($publicIpTest -and  $ostype -ne "Windows"){
-        $publicIpAddress = (Get-AzureRmPublicIpAddress -ResourceGroupName $vmrg -Name $publicIpName).IpAddress
+        $publicIpAddress = (Get-AzPublicIpAddress -ResourceGroupName $vmrg -Name $publicIpName).IpAddress
         Write-Host "Public IP Exists, Not Windows, IP Address is $publicIpAddress"
         #change this for vms to use rsa keys and use vault
         cmd.exe /c "ssh -n -l $username $publicIpAddress"}
