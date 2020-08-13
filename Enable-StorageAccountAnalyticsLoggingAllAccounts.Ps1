@@ -19,38 +19,36 @@
 
 Param(
     [Parameter(Mandatory = $true,
-               HelpMessage = "Log Retention of Storage Analytics in Day",
-               Position = 0)]
-    [ValidateRange(7,365)]
+        HelpMessage = "Log Retention of Storage Analytics in Day",
+        Position = 0)]
+    [ValidateRange(7, 365)]
     [Int]
     $LogRetention,
 
     [Parameter(Mandatory = $true,
-               HelpMessage = "Logging version",
-               Position = 1)]
+        HelpMessage = "Logging version",
+        Position = 1)]
     [ValidateSet("1.0", "2.0")]
     [string]
     $Version
 )
 
 $subscriptions = Get-AzSubscription
-foreach ($subscription in $subscriptions){
+foreach ($subscription in $subscriptions) {
     Set-AzContext -SubscriptionId $subscription.id
     Write-Host -ForegroundColor Green "[-] Start checking subscription:" $subscription.Name
-    $storageAccounts = Get-AzStorageAccount | Where-Object {$_.Sku.Tier -eq "Standard" }
+    $storageAccounts = Get-AzStorageAccount | Where-Object { $_.Sku.Tier -eq "Standard" }
     foreach ($storageAccount in $storageAccounts) {
         Write-Host -ForegroundColor Yellow "`t [-] Found a storage account named: " $storageAccount.StorageAccountName
         $key = Get-AzStorageAccountKey -ResourceGroupName $storageAccount.ResourceGroupName `
-                                       -AccountName $storageAccount.StorageAccountName `
-                                       | Where-Object {$_.KeyName -eq "key1"}
+            -AccountName $storageAccount.StorageAccountName `
+        | Where-Object { $_.KeyName -eq "key1" }
         $ctx = New-AzStorageContext -StorageAccountName $storageAccount.StorageAccountName `
-                                    -StorageAccountKey $key.Value
-        $ctx | Set-AzStorageServiceLoggingProperty -ServiceType Blob `
-                                                      -LoggingOperations All `
-                                                      -RetentionDays $LogRetention
+            -StorageAccountKey $key.Value
+        $ctx | Set-AzStorageServiceLoggingProperty -ServiceType Blob -LoggingOperations All `
+            -RetentionDays $LogRetention
         $logging = $ctx | Get-AzStorageServiceLoggingProperty -ServiceType Blob
-
-        if($logging.LoggingOperations -ne "None") {
+        if ($logging.LoggingOperations -ne "None") {
             Write-Host -ForegroundColor Green "`t [-] Storage Analytics is enabled succesfully in storage account: "$storageAccount.StorageAccountName
         }
         elseif ($logging.LoggingOperations -eq "None") {

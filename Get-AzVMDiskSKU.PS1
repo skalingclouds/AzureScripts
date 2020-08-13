@@ -1,6 +1,10 @@
-$SQLServerName = ""
-$rg = ""
-$vm= get-azvm -Name $SQLServerName -ResourceGroupName "$rg" 
+Param(
+        [Parameter(Mandatory=$true)]
+        [string] $VMName,
+        [Parameter(Mandatory=$true)]
+        [string] $ResourceGroup
+        )
+$vm= get-azvm -Name $VMName -ResourceGroupName "$ResourceGroup"
 $osdisk = get-azdisk -name $vm.storageprofile.osdisk.name
 write-host "OS Disk Name:" $osdisk.name "OS Disk Size in GB:" $osdisk.disksizegb "OS Disk SKU:" $osdisk.sku.name
 $datadisks = $vm.StorageProfile.DataDisks
